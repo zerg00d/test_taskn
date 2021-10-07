@@ -1,0 +1,11 @@
+#enter yours ip
+
+node1 ansible_host=192.168.0.171
+node2 ansible_host=192.168.0.172
+node3 ansible_host=192.168.0.173
+
+[grafana]
+node1
+
+[prom_alert]
+node2

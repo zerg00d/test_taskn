@@ -1,0 +1,23 @@
+---
+# vars for install docker
+docker_packages:
+  - apt-transport-https
+  - ca-certificates
+  - curl
+  - python
+  - python3-pip
+
+# vars for install exporter
+prometheus_node_exporter_image: prom/node-exporter
+prometheus_node_exporter_container_name: node_exporter
+
+#vars for intall nginx
+nginx_base_directory: '/tmp/nginx'
+nginx_container_name: 'nginx'
+nginx_exposed_ports:
+  - '80'
+nginx_published_ports:
+  - '80:80'
+nginx_exposed_volumes:
+  - "{{ nginx_base_directory }}/nginx.conf:/etc/nginx/nginx.conf:ro"
+  - "{{ nginx_base_directory }}/defaults:/usr/share/nginx/html:ro"

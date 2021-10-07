@@ -1,0 +1,6 @@
+datasources:
+  - name: Prometheus
+    url: {% for inventory_hostname in groups['prom_alert'] %}"http://{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}/prometheus"{% endfor %}
+
+    type: prometheus
+    access: proxy

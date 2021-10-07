@@ -1,0 +1,77 @@
+---
+- name: grafana | combine user data with default
+  set_fact:
+    grafana: "{{ grafana_data | combine(grafana, recursive=True) }}"
+  tags:
+    - always
+
+- name: grafana | create storage directory
+  file:
+    dest: "{{ grafana.grafana_storage }}"
+    state: directory
+    mode: 0777
+    owner: root
+    group: root
+
+- name: grafana | create provisioning directory
+  file:
+    dest: "{{ item }}"
+    state: directory
+    mode: 0755
+    owner: root
+    group: root
+  with_items:
+    - "{{ grafana.provisioning_dir }}"
+    - "{{ grafana.provisioning_dir }}/datasources"
+    - "{{ grafana.provisioning_dir }}/dashboards"
+    - "{{ grafana.provisioning_dir }}/notifiers"
+    - "{{ grafana.provisioning_dir }}/dashboards_list"
+
+- name: grafana | provide datasources
+  template:
+    src: prometheus.yaml
+    dest: "{{ grafana.provisioning_dir }}/datasources/prometheus.yaml"
+    owner: root
+    group: root
+    mode: 0644
+
+- name: grafana | provide dashboards configuration
+  template:
+    src: dashboards/dashboards.yaml
+    dest: "{{ grafana.provisioning_dir }}/dashboards/"
+    owner: root
+    group: root
+    mode: 0644
+
+- name: grafana | provide dashboards
+  copy:
+    src: "{{ item }}"
+    dest: "{{ grafana.provisioning_dir }}/dashboards_list/"
+    owner: root
+    group: root
+    mode: 0644
+  with_fileglob:
+    - "dashboards/*"
+
+- name: grafana | copy grafana_ini file
+  copy:
+    content: "{{ grafana_ini }}"
+    dest: "/tmp/grafana/grafana.ini"
+    mode: '0644'
+
+- name: grafana | start grafana container
+  docker_container:
+    name: "{{ docker_grafana_container_name }}"
+    image: "{{ docker_grafana_container_image }}:{{ docker_grafana_container_image_tag | default('latest') }}"
+    state: started
+    published_ports:
+      - 3000:3000
+    restart_policy: "{{ docker_grafana_restart_policy | default('always') }}"
+    volumes:
+      - "{{ grafana.grafana_storage }}:/var/lib/grafana"
+      - "{{ grafana.provisioning_dir }}:/etc/grafana/provisioning"
+      - '/tmp/grafana/grafana.ini:/etc/grafana/grafana.ini:ro'
+    env:
+      GF_PATHS_PROVISIONING: /etc/grafana/provisioning
+      GF_SECURITY_ADMIN_USER: "{{ grafana.admin_user }}"
+      GF_SECURITY_ADMIN_PASSWORD: "{{ grafana.admin_password }}"

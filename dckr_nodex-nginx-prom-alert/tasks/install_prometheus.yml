@@ -1,0 +1,40 @@
+---
+- name: prometheus | create directory
+  become: yes
+  file:
+    path: "{{ prometheus_volume_source }}"
+    mode: 0777 
+    state: directory 
+
+- name: prometheus | copy config file
+  become: yes
+  template:
+    src: prometheus.yml.j2
+    dest: "{{ prometheus_volume_source }}/prometheus.yml"
+    owner: root
+    mode: 0666 
+
+- name: prometheus | copy rule file
+  become: yes
+  copy:
+    src: "{{ prometheus_rule_file_name }}"
+    dest: "{{ prometheus_volume_source }}/{{ prometheus_rule_file_name }}"
+    owner: root
+    mode: 0666
+
+- name: prometheus | start prometheus container
+  docker_container:
+    name: "{{ prometheus_container_name }}"
+    hostname: "{{ prometheus_container_name }}"
+    image: "{{ prometheus_image }}"
+    command:
+      - "{% for key in prometheus_commandline_args %}--{{key}}={{prometheus_commandline_args[key]}} {% endfor %}"
+      - "--web.external-url=http://localhost:9090/prometheus/"
+    published_ports:
+      - 9090:9090
+    volumes:
+      - "{{ prometheus_volume_mount }}" 
+    restart_policy: always
+
+
+    

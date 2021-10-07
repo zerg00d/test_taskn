@@ -1,0 +1,8 @@
+---
+- include_tasks: install_alert_manager.yml
+  tags:
+    - "alert_manager"
+
+- include_tasks: install_prometheus.yml
+  tags: 
+    - "prometheus"
