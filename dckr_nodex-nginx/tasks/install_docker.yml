@@ -24,7 +24,7 @@
     name: docker-ce
     state: present
 
-- name: Install Docker SDK for Python
+- name: docker | install docker SDK for python
   pip:
     name: docker
   become: yes
