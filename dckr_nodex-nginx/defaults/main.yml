@@ -11,7 +11,7 @@ docker_packages:
 prometheus_node_exporter_image: prom/node-exporter
 prometheus_node_exporter_container_name: node_exporter
 
-#vars for intall nginx
+# vars for install nginx
 nginx_base_directory: '/tmp/nginx'
 nginx_container_name: 'nginx'
 nginx_exposed_ports:
